@@ -8,8 +8,6 @@ picked = Hash.new(0)
 
 doc = Nokogiri::HTML(URI.open('https://www.lotteryusa.com/pennsylvania/match-6/year'))
 
-a = ARGV[0].to_i
-
 doc.css('li').each do |data|
   d = data.content.strip
   results.push(d) if d.to_i != 0
@@ -31,7 +29,7 @@ draws.each do |draw|
   end
 end
 
-latest_draws = draws.shift(a)
+latest_draws = draws.shift(ARGV[0].to_i)
 
 latest_draws.each do |draw|
   draw.each do |pick|
