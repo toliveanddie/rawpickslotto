@@ -5,8 +5,6 @@ require 'nokogiri'
 
 doc = Nokogiri::HTML(URI.open('https://www.lotteryusa.com/powerball/year'))
 
-a = ARGV[0].to_i
-
 results = []
 picked = Hash.new(0)
 
@@ -33,7 +31,7 @@ draws.each do |draw|
   end
 end
 
-latest_draws = draws.shift(a)
+latest_draws = draws.shift(ARGV[0].to_i)
 
 latest_draws.each do |draw|
   draw.each do |pick|
