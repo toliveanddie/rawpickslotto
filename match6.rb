@@ -6,22 +6,28 @@ require 'nokogiri'
 results = []
 picked = Hash.new(0)
 
-doc = Nokogiri::HTML(URI.open('https://www.lotteryusa.com/pennsylvania/match-6/year'))
+years = ['https://www.lottery.net/pennsylvania/match-6-lotto/numbers/2023',
+         'https://www.lottery.net/pennsylvania/match-6-lotto/numbers/2022',
+         'https://www.lottery.net/pennsylvania/match-6-lotto/numbers/2021']
 
-doc.css('li').each do |data|
-  d = data.content.strip
-  results.push(d) if d.to_i != 0
+years.each do |year|
+  doc = Nokogiri::HTML(URI.open(year))
+  doc.css('td li').each do |data|
+    d = data.content.strip
+    results.push(d) if d.to_i != 0
+  end
 end
 
 draws = []
 
-55.times do |i|
+36.times do |i|
   draws.push(results.shift(6))
-  break if draws[i].length < 6
-  # break if draws.flatten.uniq.length >= 49
+  #break if draws[i].length < 5
+  #break if draws.flatten.uniq.length >= 49
 end
 
-puts draws.length
+puts "#{draws.length} draws"
+puts draws.first.join(', ')
 
 draws.each do |draw|
   draw.each do |pick|
@@ -29,7 +35,7 @@ draws.each do |draw|
   end
 end
 
-latest_draws = draws.shift(ARGV[0].to_i)
+latest_draws = draws.shift(6)
 
 latest_draws.each do |draw|
   draw.each do |pick|
@@ -40,9 +46,6 @@ end
 val = picked.values
 val.sort!
 picked.delete_if { |k, v| v < val.last(6).first }
-print picked
-puts
-puts
 b = picked.to_a.reverse
 picked = b.to_h
 h = []
@@ -53,4 +56,4 @@ v.each do |x|
     h.push(key) if value == x
   end
 end
-puts h.first(6).map(&:to_i).sort.join(' ')
+puts h.first(6).map(&:to_i).sort.join(', ')

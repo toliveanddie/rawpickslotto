@@ -3,24 +3,31 @@
 require 'open-uri'
 require 'nokogiri'
 
-doc = Nokogiri::HTML(URI.open('https://www.lotteryusa.com/powerball/year'))
+yearpages = ['https://www.lottery.net/powerball/numbers/2023', 'https://www.lottery.net/powerball/numbers/2022']
 
 results = []
+bonus = []
 picked = Hash.new(0)
 
-doc.css('li').each do |data|
-  d = data.content.strip
-  results.push(d) if d.to_i != 0
+yearpages.each do |year|
+  doc = Nokogiri::HTML(URI.open(year))
+  doc.css('td li').each do |data|
+    d = data.content.strip
+    results.push(d) if d.to_i != 0
+  end
 end
 
 draws = []
 
-105.times do |i|
+500.times do |i|
   draws.push(results.shift(5))
-  results.shift(1)
-  break if draws[i].length < 5
-
-  # break if draws.flatten.uniq.length >= 69
+  if (i+1).odd?
+    bonus.push(results.shift(1))
+    results.shift(1)
+  else
+    bonus.push(results.shift(1))
+  end
+  #break if draws.flatten.uniq.length >= 69
 end
 
 puts draws.length
@@ -31,7 +38,7 @@ draws.each do |draw|
   end
 end
 
-latest_draws = draws.shift(ARGV[0].to_i)
+latest_draws = draws.shift(13)
 
 latest_draws.each do |draw|
   draw.each do |pick|
@@ -58,16 +65,12 @@ end
 
 ############## bonus ball ################
 
-bonus = []
-doc.css('span').each do |data|
-  d = data.content.strip
-  bonus.push(d) if d.to_i != 0
-end
-
+bonus.flatten!
 bonus_ball = Hash.new(0)
 
 bonus.each do |ball|
   bonus_ball[ball] = bonus_ball[ball] + 1
+  break if bonus_ball.values.length >= 26
 end
 
 valb = bonus_ball.values
@@ -76,7 +79,7 @@ valb.sort!
 bonus_ball.delete_if { |_ke, va| va < valb.last(8).first }
 print bonus_ball
 puts
-puts h.first(5).map(&:to_i).sort.join(' ')
+puts h.first(5).map(&:to_i).sort.join(', ')
 print 'bonus: '
 print bonus_ball.keys.last
 puts
